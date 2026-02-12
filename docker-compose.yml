@@ -31,6 +31,8 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - shop-net-v1
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest
@@ -41,6 +43,8 @@ services:
         condition: service_healthy
     ports:
       - "${KAFKA_UI_PORT:-8080}:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       DYNAMIC_CONFIG_ENABLED: "true"
       AUTH_TYPE: LOGIN_FORM
@@ -48,6 +52,17 @@ services:
       SPRING_SECURITY_USER_PASSWORD: ${KAFKA_UI_PASSWORD}
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      VIRTUAL_HOST: ${AUTO_SSL_VIRTUAL_HOST}
+      LETSENCRYPT_HOST: ${AUTO_SSL_LETSENCRYPT_HOST}
+      LETSENCRYPT_EMAIL: ${AUTO_SSL_LETSENCRYPT_EMAIL}
+      VIRTUAL_PORT: ${AUTO_SSL_VIRTUAL_PORT}
+    networks:
+      - shop-net-v1
 
 volumes:
   kafka_data:
+
+networks:
+  shop-net-v1:
+    name: shop-net-v1
+    external: true
